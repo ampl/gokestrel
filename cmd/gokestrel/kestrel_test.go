@@ -120,9 +120,8 @@ func TestRunSubmitKill(t *testing.T) {
 		t.Skip("Skipping due to missing TEST_STUB and/or TEST_EMAIL")
 	}
 	os.Setenv("email", email)
-	os.Setenv("kestrel_stub", stub)
 	os.Setenv("kestrel_options", "solver=cplex")
-	exit, err := run([]string{"kestrel", "submit"})
+	exit, err := run([]string{"kestrel", "submit", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
@@ -141,7 +140,7 @@ func TestRunSubmitKill(t *testing.T) {
 		if want := 0; exit != want || err != nil {
 			t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 		}
-		exit, err = run([]string{"kestrel", "retrieve"})
+		exit, err = run([]string{"kestrel", "retrieve", stub})
 		if want := 0; exit != want || err != nil {
 			t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 		}
@@ -155,37 +154,36 @@ func TestRunSubmitRetrieve(t *testing.T) {
 		t.Skip("Skipping due to missing TEST_STUB and/or TEST_EMAIL")
 	}
 	os.Setenv("email", email)
-	os.Setenv("kestrel_stub", stub)
 	os.Setenv("kestrel_options", "solver=cplex")
-	exit, err := run([]string{"kestrel", "retrieve"}) // should fail
+	exit, err := run([]string{"kestrel", "retrieve", stub}) // should fail
 	if want := 1; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "submit"})
+	exit, err = run([]string{"kestrel", "submit", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "retrieve"})
+	exit, err = run([]string{"kestrel", "retrieve", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "submit"})
+	exit, err = run([]string{"kestrel", "submit", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "submit"})
+	exit, err = run([]string{"kestrel", "submit", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "retrieve"})
+	exit, err = run([]string{"kestrel", "retrieve", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "retrieve"})
+	exit, err = run([]string{"kestrel", "retrieve", stub})
 	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
-	exit, err = run([]string{"kestrel", "retrieve"}) // should fail
+	exit, err = run([]string{"kestrel", "retrieve", stub}) // should fail
 	if want := 1; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}

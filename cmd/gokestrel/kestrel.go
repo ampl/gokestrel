@@ -30,6 +30,7 @@ func NewKestrel() (*Kestrel, error) {
 		return nil, fmt.Errorf("An email address is required for NEOS submissions.\n" +
 			"To set: option email \"<address>\";\n\n")
 	}
+	fmt.Printf("Connecting to: %s:%s\n", host, port)
 	client, err := xmlrpc.NewClient(fmt.Sprintf("https://%s:%s", host, port))
 	if err == nil {
 		err = client.Call("ping", nil, nil)
@@ -98,7 +99,7 @@ func (k *Kestrel) submit(xml string) (int, string, error) {
 }
 
 func (k *Kestrel) retrieve(stub string, jobNumber int, password string) error {
-	stub = strings.TrimSuffix(stub, ".nl")
+	stub = strings.TrimSuffix(stub, ".nl") + ".sol"
 	request := struct {
 		JobNumber int
 		Password  string
@@ -109,7 +110,8 @@ func (k *Kestrel) retrieve(stub string, jobNumber int, password string) error {
 	if err := k.Client.Call("getFinalResults", &request, &result); err != nil {
 		return err
 	}
-	_, err := writeToFile(result.Solution, stub+".sol")
+	fmt.Printf("Writting solution to %s\n", stub)
+	_, err := writeToFile(result.Solution, stub)
 	return err
 }
 

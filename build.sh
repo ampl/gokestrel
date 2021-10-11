@@ -11,20 +11,21 @@ build () {
    bdir=$BUILD_DIR/gokestrel.$platform
    name=gokestrel.$platform #.`date +%Y%m%d`
    mkdir -p $bdir
-   # rm -rf $bdir/*
+   rm -rf $bdir/*
+   cp extra/* $bdir/
    if [[ "$platform" == mswin* ]]; then
       ext=".exe"
    else
       ext=""
    fi
-   output=gokestrel$ext
+   output=kestrel$ext
    go build -o $bdir/$output ./cmd/gokestrel
    cd $bdir
    if [[ "$platform" == mswin* ]]; then
-      zip -r $name.zip $output
+      zip -r $name.zip *
       cp $name.zip $PACKAGES_DIR
    else
-      tar czvf $name.tgz $output
+      tar czvf $name.tgz *
       cp $name.tgz $PACKAGES_DIR
    fi
    cd -

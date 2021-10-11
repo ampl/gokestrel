@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -61,10 +63,12 @@ func writeJobs(jobs []Job, jobsFile string) error {
 }
 
 func submit(stub string) (int, error) {
+	stub = strings.TrimSuffix(stub, ".nl")
 	k, err := NewKestrel()
 	if err != nil {
 		return 1, err
 	}
+	fmt.Printf("Submitting model at %s\n", stub+".nl")
 	xml, err := k.formXML(stub)
 	if err != nil {
 		return 1, err
@@ -117,13 +121,7 @@ func retrieve(stub string) (int, error) {
 	return 0, nil
 }
 
-func kill() (int, error) {
-	jobNumber, password := getJobAndPassword()
-	if jobNumber == 0 {
-		fmt.Println("To kill a NEOS job, first set kestrel_options variable:")
-		fmt.Println("\tampl: option kestrel_options \"job=#### password=xxxx\";")
-		return 1, nil
-	}
+func kill(jobNumber int, password string) (int, error) {
 	k, err := NewKestrel()
 	if err != nil {
 		return 1, err
@@ -206,20 +204,39 @@ func solve(stub string, sigint chan os.Signal) (int, error) {
 }
 
 func run(args []string) (int, error) {
-	if len(args) == 2 && args[1] == "submit" {
+	if len(args) >= 2 && len(args) <= 3 && args[1] == "submit" {
 		stub := getEnvOption("kestrel_stub")
 		if stub == "" {
-			stub = "kestproblem"
+			stub = "kmodel"
+		}
+		if len(args) == 3 {
+			stub = args[2]
 		}
 		return submit(stub)
-	} else if len(args) == 2 && args[1] == "retrieve" {
+	} else if len(args) >= 2 && len(args) <= 3 && args[1] == "retrieve" {
 		stub := getEnvOption("kestrel_stub")
 		if stub == "" {
-			stub = "kestresult"
+			stub = "kmodel"
+		}
+		if len(args) == 3 {
+			stub = args[2]
 		}
 		return retrieve(stub)
-	} else if len(args) == 2 && args[1] == "kill" {
-		return kill()
+	} else if (len(args) == 2 || len(args) == 4) && args[1] == "kill" {
+		jobNumber, password := getJobAndPassword()
+		if len(args) == 4 {
+			n, err := strconv.ParseInt(args[2], 10, 32)
+			if err != nil {
+				return 1, err
+			}
+			jobNumber = int(n)
+			password = args[3]
+		} else if jobNumber == 0 {
+			fmt.Println("To kill a NEOS job, first set kestrel_options variable:")
+			fmt.Println("\tampl: option kestrel_options \"job=#### password=xxxx\";")
+			return 1, nil
+		}
+		return kill(jobNumber, password)
 	} else if len(args) == 3 && args[2] == "-AMPL" {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
@@ -232,7 +249,7 @@ func run(args []string) (int, error) {
 func main() {
 	code, err := run(os.Args)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
 	}
 	os.Exit(code)
 }
