@@ -52,7 +52,7 @@ func writeJobs(jobs []Job, jobsFile string) error {
 	}
 	defer f.Close()
 	for _, job := range jobs {
-		if _, err := f.WriteString(fmt.Sprintf("%d %s\n", job.jobNumber, job.password)); err != nil {
+		if _, err := fmt.Fprintf(f, "%d %s\n", job.jobNumber, job.password); err != nil {
 			defer os.Remove(jobsFile)
 			return err
 		}
@@ -135,14 +135,7 @@ func kill() (int, error) {
 	return 0, nil
 }
 
-func solve(stub string) (int, error) {
-	sigs := make(chan os.Signal)
-	stop := make(chan bool)
-	signal.Notify(sigs, os.Interrupt)
-	go func() {
-		<-sigs
-		stop <- true
-	}()
+func solve(stub string, sigint chan os.Signal) (int, error) {
 	k, err := NewKestrel()
 	if err != nil {
 		return 1, err
@@ -169,7 +162,7 @@ func solve(stub string) (int, error) {
 		errors <- nil
 	}()
 	select {
-	case <-stop:
+	case <-sigint:
 		fmt.Println("Keyboard Interrupt while submitting problem.")
 		return 1, nil
 	case err := <-errors:
@@ -177,8 +170,6 @@ func solve(stub string) (int, error) {
 			return 1, err
 		}
 	}
-	// fmt.Printf("jobNumber: %d\n", jobNumber)
-	// fmt.Printf("password: %s\n", password)
 	offset := 0
 	output := ""
 	status := "Running"
@@ -194,7 +185,7 @@ func solve(stub string) (int, error) {
 			log.Println(err)
 		}
 		select {
-		case <-stop:
+		case <-sigint:
 			fmt.Printf("Keyboard Interrupt\n")
 			fmt.Printf("Job is still running on remote machine\n")
 			fmt.Printf("To stop job:\n")
@@ -230,7 +221,9 @@ func run(args []string) (int, error) {
 	} else if len(args) == 2 && args[1] == "kill" {
 		return kill()
 	} else if len(args) == 3 && args[2] == "-AMPL" {
-		return solve(args[1])
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		return solve(args[1], sigint)
 	}
 	fmt.Println("kestrel should be called from inside AMPL.")
 	return 1, nil

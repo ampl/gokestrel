@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestMain(m *testing.M) {
@@ -53,8 +54,22 @@ func TestSolve(t *testing.T) {
 	}
 	os.Setenv("email", email)
 	os.Setenv("kestrel_options", "solver=cplex")
-	exit, err := solve(stub)
+	sigint := make(chan os.Signal, 1)
+	exit, err := solve(stub, sigint)
 	if want := 0; exit != want {
+		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+	}
+	sigint <- os.Interrupt
+	exit, err = solve(stub, sigint)
+	if want := 1; exit != want {
+		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+	}
+	go func() {
+		time.Sleep(5 * time.Second)
+		sigint <- os.Interrupt
+	}()
+	exit, err = solve(stub, sigint)
+	if want := 1; exit != want {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
 }
