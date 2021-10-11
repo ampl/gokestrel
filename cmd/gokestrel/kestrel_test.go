@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -135,6 +136,10 @@ func TestRunSubmitKill(t *testing.T) {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
 	for _, job := range jobs {
+		exit, err = run([]string{"kestrel", "kill", strconv.Itoa(job.jobNumber), job.password})
+		if want := 0; exit != want || err != nil {
+			t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+		}
 		os.Setenv("kestrel_options", fmt.Sprintf("job=%d password=%s", job.jobNumber, job.password))
 		exit, err = run([]string{"kestrel", "kill"})
 		if want := 0; exit != want || err != nil {
@@ -144,6 +149,7 @@ func TestRunSubmitKill(t *testing.T) {
 		if want := 0; exit != want || err != nil {
 			t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 		}
+		os.Unsetenv("kestrel_options")
 	}
 }
 
