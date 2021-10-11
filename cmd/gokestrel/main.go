@@ -8,10 +8,13 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var Version = "development"
 
 type Job = struct {
 	jobNumber int
@@ -204,7 +207,10 @@ func solve(stub string, sigint chan os.Signal) (int, error) {
 }
 
 func run(args []string) (int, error) {
-	if len(args) >= 2 && len(args) <= 3 && args[1] == "submit" {
+	if len(args) == 2 && (args[1] == "-v" || args[1] == "version") {
+		fmt.Printf("kestrel version %v %v/%v\n", Version, runtime.GOOS, runtime.GOARCH)
+		return 0, nil
+	} else if len(args) >= 2 && len(args) <= 3 && args[1] == "submit" {
 		stub := getEnvOption("kestrel_stub")
 		if stub == "" {
 			stub = "kmodel"

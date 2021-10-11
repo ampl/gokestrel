@@ -3,6 +3,7 @@ cd `dirname $0`
 BASEDIR=`pwd`
 set -ex
 
+VERSION=0.0.0
 BUILD_DIR=$BASEDIR/build
 PACKAGES_DIR=$BUILD_DIR/packages
 
@@ -19,7 +20,7 @@ build () {
       ext=""
    fi
    output=kestrel$ext
-   go build -o $bdir/$output ./cmd/gokestrel
+   go build -ldflags="-X 'main.Version=v$VERSION'" -o $bdir/$output ./cmd/gokestrel
    cd $bdir
    if [[ "$platform" == mswin* ]]; then
       zip -r $name.zip *
