@@ -89,6 +89,14 @@ Connecting to: neos-server.org:3333
 Job XXXX is finished
 ```
 
+### Authenticated submissions
+
+For authenticated submissions set `neos_username` and `neos_user_password` as follows:
+```bash
+ampl: option neos_username 'username';
+ampl: option neos_user_password 'password';
+```
+
 ## License
 
 BSD-3

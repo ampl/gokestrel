@@ -59,9 +59,10 @@ func (k *Kestrel) submit(xml string) (int, string, error) {
 	}{}
 	if k.Username == "" || k.UserPassword == "" {
 		request := struct {
-			Xml  string
-			User string
-		}{xml, user}
+			Xml     string
+			User    string
+			Kestrel string
+		}{xml, user, "kestrel"}
 		if err := k.Client.Call("submitJob", &request, &result); err != nil {
 			return 0, "", err
 		}
@@ -70,7 +71,8 @@ func (k *Kestrel) submit(xml string) (int, string, error) {
 			Xml      string
 			Username string
 			Password string
-		}{xml, k.Username, k.UserPassword}
+			Kestrel  string
+		}{xml, k.Username, k.UserPassword, "kestrel"}
 		if err := k.Client.Call("authenticatedSubmitJob", &request, &result); err != nil {
 			return 0, "", err
 		}

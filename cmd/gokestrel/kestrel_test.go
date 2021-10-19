@@ -62,7 +62,7 @@ func TestSolve(t *testing.T) {
 	}
 	sigint <- os.Interrupt
 	exit, err = solve(stub, sigint)
-	if want := 1; exit != want {
+	if want := 1; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
 	go func() {
@@ -70,7 +70,36 @@ func TestSolve(t *testing.T) {
 		sigint <- os.Interrupt
 	}()
 	exit, err = solve(stub, sigint)
-	if want := 1; exit != want {
+	if want := 1; exit != want || err != nil {
+		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+	}
+}
+
+func TestAuthenticated(t *testing.T) {
+	stub := getEnvOption("TEST_STUB")
+	email := getEnvOption("TEST_EMAIL")
+	username := getEnvOption("TEST_USERNAME")
+	password := getEnvOption("TEST_PASSWORD")
+	if stub == "" || email == "" || username == "" || password == "" {
+		t.Skip("Skipping due to missing TEST_STUB, TEST_EMAIL, TEST_USERNAME and/or TEST_PASSWORD")
+	}
+	defer func() {
+		for _, env := range []string{"email", "kestrel_options", "neos_username", "neos_user_password"} {
+			os.Unsetenv(env)
+		}
+	}()
+	os.Setenv("email", email)
+	os.Setenv("kestrel_options", "solver=cplex")
+	os.Setenv("neos_username", username)
+	os.Setenv("neos_user_password", password)
+	sigint := make(chan os.Signal, 1)
+	exit, err := solve(stub, sigint)
+	if want := 0; exit != want {
+		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+	}
+	os.Setenv("neos_user_password", "wrong_password")
+	exit, err = solve(stub, sigint)
+	if want := 1; exit != want || err == nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
 }
