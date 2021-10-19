@@ -34,10 +34,11 @@ build () {
 
 mkdir -p $PACKAGES_DIR
 rm -rf $PACKAGES_DIR/*
+GOOS=darwin GOARCH=amd64 build macos64
 GOOS=windows GOARCH=386 build mswin32
 GOOS=windows GOARCH=amd64 build mswin64
 GOOS=linux GOARCH=386 build linux-intel32
 GOOS=linux GOARCH=amd64 build linux-intel64
-GOOS=darwin GOARCH=amd64 build macos64
-GOOS=linux GOARCH=ppc64le build linux-ppcle64
+GOOS=linux GOARCH=arm64 build linux-arm64
+GOOS=linux GOARCH=ppc64le build linux-ppc64le
 find build

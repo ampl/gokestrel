@@ -1,0 +1,26 @@
+jobs:
+- job: linux
+  pool: {vmImage: 'ubuntu-latest'}
+  variables:
+    upload: $(Build.ArtifactStagingDirectory)
+  steps:
+    - task: GoTool@0
+      inputs:
+        version: '1.16' 
+    - bash: |
+        go version
+      displayName: go version
+    - bash: |
+        set -ex
+        go env
+        go version
+        go mod download
+        go build ./...
+      displayName: Build once
+    - bash: |
+        set -ex
+        bash build.sh
+        cp build/packages/* $UPLOAD
+      displayName: Build all versions and upload
+    - task: PublishBuildArtifacts@1
+      inputs: {pathtoPublish: '$(Build.ArtifactStagingDirectory)'}
