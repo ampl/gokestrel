@@ -34,7 +34,8 @@ CPLEX 20.1.0.0: optimal solution; objective 88.2
 
 ### Using commands for asyncronous submissions
 
-Please make sure `kestrelsub`, `kestrelret`, and `kestrelkill` are in the current directory or invoke them using the complete path to them.
+The command files `kestrelsub`, `kestrelret`, and `kestrelkill` are available at [commands/](commands/). To insure that AMPL will find the scripts, place them in the directory (or folder) that will be current when you execute AMPL, or set option `ampl_include` to specify the directory where the script can be found.
+
 ```bash
 $ ampl
 ampl: model diet.mod;
