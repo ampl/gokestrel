@@ -280,7 +280,7 @@ func (k *Kestrel) formXML(stub string) (string, error) {
 		solverOptions, base64.StdEncoding.EncodeToString(buf.Bytes()))
 
 	for _, key := range []string{"adj", "col", "env", "fix", "spc", "row", "slc", "unv"} {
-		if content, err := ioutil.ReadFile(stub + key); err == nil && len(content) != 0 {
+		if content, err := ioutil.ReadFile(stub + "." + key); err == nil && len(content) != 0 {
 			xml += fmt.Sprintf("<%s><![CDATA[%s]]></%s>\n", key, content, key)
 		}
 	}
