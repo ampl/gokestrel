@@ -23,7 +23,7 @@ func TestGetJobAndPassword(t *testing.T) {
 		t.Run(testname, func(t *testing.T) {
 			os.Setenv(tt.env, tt.value)
 			jobNumber, jobPassword := getJobAndPassword()
-			os.Unsetenv(tt.env)
+			unsetEnv(tt.env)
 			if jobNumber != tt.jobNumber {
 				t.Errorf("got '%v', want '%v'", jobNumber, tt.jobNumber)
 			}
@@ -34,16 +34,16 @@ func TestGetJobAndPassword(t *testing.T) {
 	}
 }
 
-func TestPriority(t *testing.T) {
+func TestGetPriority(t *testing.T) {
 	var tests = []struct {
 		env      string
 		value    string
 		priority string
 	}{
-		{"kestrel_options", " priority = 1 ", "1"},
-		{"kestrel_options", " priorit y = 1 ", ""},
-		{"kestrel_options", " priority = abc1 ", "abc1"},
-		{"kestrel_options", "", ""},
+		{"kestrel_options", " priority = short ", "short"},
+		{"kestrel_options", " priority = long ", "long"},
+		{"kestrel_options", " priorit y = long ", "short"},
+		{"kestrel_options", "", "short"},
 	}
 	for i, tt := range tests {
 		testname := fmt.Sprintf("test #%d", i)
@@ -195,9 +195,7 @@ func TestGetSolverName(t *testing.T) {
 				solver, err = kestrel.getSolverName()
 				failed = err != nil
 			}
-			os.Unsetenv(tt.env1)
-			os.Unsetenv(tt.env2)
-			os.Unsetenv(tt.env3)
+			unsetEnv(tt.env1, tt.env2, tt.env3)
 			if solver != tt.solver {
 				t.Errorf("got '%v', %v, want '%v'", solver, err, tt.solver)
 			}

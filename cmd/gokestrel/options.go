@@ -16,6 +16,12 @@ func getEnv(alternatives ...string) string {
 	return ""
 }
 
+func unsetEnv(vars ...string) {
+	for _, v := range vars {
+		os.Unsetenv(v)
+	}
+}
+
 func getEnvOption(option string) string {
 	return getEnv(option, strings.ToLower(option), strings.ToUpper(option))
 }
@@ -52,12 +58,12 @@ var priorityRgx = regexp.MustCompile(`priority\s*=\s*(\S+)`)
 func getPriority() string {
 	options := getOptions()
 	if options == "" {
-		return ""
+		return "short"
 	}
 	if match := priorityRgx.FindStringSubmatch(options); len(match) == 2 {
 		return match[1]
 	}
-	return ""
+	return "short"
 }
 
 var neosServerPortRgx = regexp.MustCompile(`(\S+)\s*:\s*(\d+)`)

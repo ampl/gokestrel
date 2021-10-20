@@ -83,11 +83,7 @@ func TestAuthenticated(t *testing.T) {
 	if stub == "" || email == "" || username == "" || password == "" {
 		t.Skip("Skipping due to missing TEST_STUB, TEST_EMAIL, TEST_USERNAME and/or TEST_PASSWORD")
 	}
-	defer func() {
-		for _, env := range []string{"email", "kestrel_options", "neos_username", "neos_user_password"} {
-			os.Unsetenv(env)
-		}
-	}()
+	defer unsetEnv("email", "kestrel_options", "neos_username", "neos_user_password")
 	os.Setenv("email", email)
 	os.Setenv("kestrel_options", "solver=cplex")
 	os.Setenv("neos_username", username)
@@ -100,6 +96,28 @@ func TestAuthenticated(t *testing.T) {
 	os.Setenv("neos_user_password", "wrong_password")
 	exit, err = solve(stub, sigint)
 	if want := 1; exit != want || err == nil {
+		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+	}
+}
+
+func TestPriority(t *testing.T) {
+	stub := getEnvOption("TEST_STUB")
+	email := getEnvOption("TEST_EMAIL")
+	if stub == "" || email == "" {
+		t.Skip("Skipping due to missing TEST_STUB and/or TEST_EMAIL")
+	}
+	defer unsetEnv("email", "kestrel_options", "cplex_options")
+	os.Setenv("email", email)
+	os.Setenv("kestrel_options", "solver=cplex priority=short")
+	os.Setenv("cplex_options", "lpdisplay=1")
+	sigint := make(chan os.Signal, 1)
+	exit, err := solve(stub, sigint)
+	if want := 0; exit != want || err != nil {
+		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
+	}
+	os.Setenv("kestrel_options", "solver=cplex priority=long")
+	exit, err = solve(stub, sigint)
+	if want := 0; exit != want || err != nil {
 		t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 	}
 }
@@ -149,6 +167,7 @@ func TestRunSubmitKill(t *testing.T) {
 	if stub == "" || email == "" {
 		t.Skip("Skipping due to missing TEST_STUB and/or TEST_EMAIL")
 	}
+	defer unsetEnv("email", "kestrel_options")
 	os.Setenv("email", email)
 	os.Setenv("kestrel_options", "solver=cplex")
 	exit, err := run([]string{"kestrel", "submit", stub})
@@ -178,7 +197,6 @@ func TestRunSubmitKill(t *testing.T) {
 		if want := 0; exit != want || err != nil {
 			t.Fatalf("got '%v', '%v', want '%v'", exit, err, want)
 		}
-		os.Unsetenv("kestrel_options")
 	}
 }
 

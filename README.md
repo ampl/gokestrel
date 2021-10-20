@@ -97,6 +97,18 @@ ampl: option neos_username 'username';
 ampl: option neos_user_password 'password';
 ```
 
+### Priority
+
+Jobs submitted with the priority of long can run for at most 8 hours. Jobs submitted with the priority short can run for at most 5 minutes. Results for long jobs do not stream. You can control the priority as follows:
+```bash
+ampl: option kestrel_options "solver=xxx priority=short";
+```
+or
+```bash
+ampl: option kestrel_options "solver=xxx priority=long";
+```
+In this driver we set the default priority to short so that we can retrieve output from the solver.
+
 ## License
 
 BSD-3
