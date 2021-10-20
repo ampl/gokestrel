@@ -40,5 +40,5 @@ GOOS=windows GOARCH=amd64 build mswin64
 GOOS=linux GOARCH=386 build linux-intel32
 GOOS=linux GOARCH=amd64 build linux-intel64
 GOOS=linux GOARCH=arm64 build linux-arm64
-GOOS=linux GOARCH=ppcle64 build linux-ppc64le
+GOOS=linux GOARCH=ppc64le build linux-ppc64le
 find build
