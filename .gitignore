@@ -5,3 +5,6 @@
 *.nl
 *.html
 build/
+/setenv
+/gokestrel
+/upload.sh

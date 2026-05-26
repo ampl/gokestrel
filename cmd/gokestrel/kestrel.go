@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"encoding/base64"
 	"fmt"
+	"hash/fnv"
 	"io"
 	"io/ioutil"
 	"os"
@@ -100,6 +101,23 @@ func (k *Kestrel) submit(xml string) (int, string, error) {
 	return jobNumber, password, nil
 }
 
+var SolValidationEnv = ""
+var SolValidationHeader = ""
+
+func writeSolutionValidationFile(solFile string, size int) error {
+	if suffix, ok := os.LookupEnv(SolValidationEnv); ok {
+		h := fnv.New32a()
+		payload := fmt.Sprintf("%s%x", SolValidationHeader, size)
+		if _, err := h.Write([]byte(payload)); err != nil {
+			return err
+		}
+		if _, err := writeToFile(fmt.Sprintf("%x", h.Sum32()), solFile+suffix); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (k *Kestrel) retrieve(stub string, jobNumber int, password string) error {
 	stub = strings.TrimSuffix(stub, ".nl") + ".sol"
 	request := struct {
@@ -112,9 +130,14 @@ func (k *Kestrel) retrieve(stub string, jobNumber int, password string) error {
 	if err := k.Client.Call("getFinalResults", &request, &result); err != nil {
 		return err
 	}
-	fmt.Printf("Writting solution to %s\n", stub)
-	_, err := writeToFile(result.Solution, stub)
-	return err
+	size, err := writeToFile(result.Solution, stub)
+	if err != nil {
+		return err
+	}
+	if SolValidationEnv != "" {
+		return writeSolutionValidationFile(stub, size)
+	}
+	return nil
 }
 
 func (k *Kestrel) kill(jobNumber int, password string) error {
