@@ -4,7 +4,7 @@ This project replicates https://github.com/NEOS-Server/Kestrel-AMPL-Linux/ in Go
 
 Protocol: [NEOS XML-RPC protocol](https://neos-server.org/neos/xml-rpc.html)
 
-Downlaod from: https://ampl.com/dl/fdabrandao/gokestrel/
+Downlaod from: https://portal.ampl.com/user/ampl/download/list
 
 ## Usage
 
